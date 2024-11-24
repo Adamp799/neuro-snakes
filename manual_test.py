@@ -1,7 +1,5 @@
-from gordongames.envs.ggames.constants import *
 import gym
 import gym_snake
-import time
 
 if __name__=="__main__":
     print("PRESS q to quit")

@@ -27,13 +27,14 @@ class Grid():
 
         self.unit_size = int(unit_size)
         self.unit_gap = unit_gap
-        self.grid_size = np.asarray(grid_size, dtype=np.int) # size in terms of units
+        self.grid_size = np.asarray(grid_size, dtype=int) # size in terms of units
         height = self.grid_size[1]*self.unit_size
         width = self.grid_size[0]*self.unit_size
         channels = 3
         self.grid = np.zeros((height, width, channels), dtype=np.uint8)
         self.grid[:,:,:] = self.SPACE_COLOR
         self.open_space = grid_size[0]*grid_size[1]
+        self.food = None
 
     def check_death(self, head_coord):
         """
@@ -225,6 +226,7 @@ class Grid():
             if np.array_equal(self.color_of(coord), self.SPACE_COLOR):
                 coord_not_found = False
         self.draw(coord, self.FOOD_COLOR)
+        self.food = coord
         return True
 
     def off_grid(self, coord):
@@ -245,3 +247,13 @@ class Grid():
 
         color = self.color_of(coord)
         return np.array_equal(color, self.BODY_COLOR) or color[0] == self.HEAD_COLOR[0]
+    
+    def tail_space(self, coord):
+        """
+        Checks if argued coord is occupied by a tail
+
+        coord - x,y integer coordinates as a tuple, list, or ndarray
+        """
+
+        color = self.color_of(coord)
+        return np.array_equal(color, self.BODY_COLOR) 

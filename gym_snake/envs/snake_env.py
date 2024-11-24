@@ -4,6 +4,8 @@ import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
 from gym_snake.envs.snake import Controller, Discrete
+from matplotlib.backends.backend_agg import FigureCanvasAgg 
+from IPython.display import clear_output, display
 
 try:
     import matplotlib.pyplot as plt
@@ -21,7 +23,7 @@ class SnakeEnv(gym.Env):
         self.snake_size = snake_size
         self.n_snakes = n_snakes
         self.n_foods = n_foods
-        self.viewer = None
+        self.im = None
         self.random_init = random_init
 
         self.action_space = spaces.Discrete(4)
@@ -30,7 +32,7 @@ class SnakeEnv(gym.Env):
             self.grid_size, self.unit_size, self.unit_gap,
             self.snake_size, self.n_snakes, self.n_foods,
             random_init=self.random_init)
-        grid = controller.grid
+        grid = self.grid = controller.grid
         self.observation_space = spaces.Box(
             low=np.min(grid.COLORS),
             high=np.max(grid.COLORS),
@@ -46,15 +48,19 @@ class SnakeEnv(gym.Env):
         return self.last_obs
 
     def render(self, mode='human', close=False, frame_speed=.1):
-        if self.viewer is None:
-            self.fig = plt.figure()
-            self.viewer = self.fig.add_subplot(111)
-            plt.ion()
-            self.fig.show()
-        self.viewer.clear()
-        self.viewer.imshow(self.last_obs)
-        plt.pause(frame_speed)
-        self.fig.canvas.draw()
+        if close:
+            plt.close()
+            return
+        if self.im is None:
+            self.fig, self.ax = plt.subplots()
+            self.canvas = FigureCanvasAgg(self.fig)
+            self.im = self.ax.imshow(self.last_obs, animated=True)
+        else:
+            self.im.set_data(self.last_obs)
+        self.canvas.draw()
+        clear_output(wait=True)
+        display(self.fig)
+        time.sleep(frame_speed)
 
     def seed(self, x):
         pass

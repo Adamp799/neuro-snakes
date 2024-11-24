@@ -27,3 +27,4 @@ if __name__=="__main__":
             print("    ", k, ":", info[k])
         if done:
             obs = env.reset()
+    env.render(close=True)

@@ -61,13 +61,14 @@ def eval_fitness(genomes, config):
    done = False
 
    for genome_id, g in genomes:
-      net = nn.FeedForwardNetwork.create(g, config)
+      net = nn.FeedForwardNetwork.create(g, config) # create neural network
       score = 0.0
-      hunger = 100
+      hunger = 100 # 100 steps without eating and the snake dies
 
       env = gym.make('snake-v0')
       env.reset()
-      env.render()
+      if rendering:
+        env.render() 
       head = env.controller.snakes[0].head
       dist_to_food = math.sqrt((head[0]-env.grid.food[0])**2 + (head[1]-env.grid.food[1])**2)
 
@@ -78,7 +79,7 @@ def eval_fitness(genomes, config):
 
       while not done:
         count += 1
-        outputs = net.activate([look_to(0, head, env), look_to(1, head, env), look_to(2, head, env), look_to(3, head, env)])
+        outputs = net.activate([look_to(0, head, env), look_to(1, head, env), look_to(2, head, env), look_to(3, head, env)]) 
         direction = outputs.index(max(outputs))
 
         obs, rew, done, info = env.step(direction)
@@ -106,7 +107,7 @@ def eval_fitness(genomes, config):
          print("score: ", score)
          env.render()
       
-      g.fitness = score
+      g.fitness = score 
       if best_instance is None or g.fitness > best_fitness:
          best_instance = {
             'genome': g,
@@ -129,8 +130,9 @@ config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                      neat.DefaultSpeciesSet, neat.DefaultStagnation,
                      'config')
 pop = population.Population(config)
-if len(sys.argv) > 1:
+
+if len(sys.argv) > 1: # load population from file
     pop = load_object(sys.argv[1])
     print("Reading popolation from " + sys.argv[1])
-pop.run(eval_fitness, 10000)
-         
+
+pop.run(eval_fitness, 10000) 

@@ -51,7 +51,7 @@ class SnakeEnv(gym.Env):
         if close:
             plt.close()
             return
-        if self.im is None:
+        if self.im is None: # first time calling render
             self.fig, self.ax = plt.subplots()
             self.canvas = FigureCanvasAgg(self.fig)
             self.im = self.ax.imshow(self.last_obs, animated=True)
@@ -60,7 +60,7 @@ class SnakeEnv(gym.Env):
         self.canvas.draw()
         clear_output(wait=True)
         display(self.fig)
-        time.sleep(frame_speed)
+        time.sleep(frame_speed) # give it time to display
 
     def seed(self, x):
         pass

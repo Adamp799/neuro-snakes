@@ -58,7 +58,8 @@ class SnakeEnv(gym.Env):
         else:
             self.im.set_data(self.last_obs)
         self.canvas.draw()
-        clear_output(wait=True)
+        if mode == 'human':
+            clear_output(wait=True)
         display(self.fig)
         time.sleep(frame_speed) # give it time to display
 

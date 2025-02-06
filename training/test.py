@@ -1,11 +1,13 @@
 import gym
+import os, pickle, math, sys
+sys.path.append('..')
 import gym_snake
+import numpy as np
 import neat
 from neat import nn, population
-import os, pickle, math, sys
-import numpy as np
-rendering = True
+
 global pop
+rendering = True
 
 def look_to(direction, head, env):
     grid = env.grid

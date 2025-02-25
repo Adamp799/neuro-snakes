@@ -8,8 +8,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from IPython.display import clear_output, display
 
 try:
-    import matplotlib.pyplot as plt
     import matplotlib
+    import matplotlib.pyplot as plt
 except ImportError as e:
     raise error.DependencyNotInstalled("{}. (HINT: see matplotlib documentation for installation https://matplotlib.org/faq/installing_faq.html#installation".format(e))
 
@@ -45,23 +45,23 @@ class SnakeEnv(gym.Env):
     def reset(self):
         self.controller = Controller(self.grid_size, self.unit_size, self.unit_gap, self.snake_size, self.n_snakes, self.n_foods, random_init=self.random_init)
         self.last_obs = self.controller.grid.grid.copy()
+
+        self.fig, self.ax = plt.subplots()
+        self.im = self.ax.imshow(self.last_obs, animated=True)
+        plt.ion()  # Enable interactive mode
         return self.last_obs
 
-    def render(self, mode='human', close=False, frame_speed=.1):
+    def render(self, close=False, frame_speed=.2):
         if close:
             plt.close()
             return
-        if self.im is None: # first time calling render
-            self.fig, self.ax = plt.subplots()
-            self.canvas = FigureCanvasAgg(self.fig)
-            self.im = self.ax.imshow(self.last_obs, animated=True)
-        else:
-            self.im.set_data(self.last_obs)
-        self.canvas.draw()
-        if mode == 'human':
-            clear_output(wait=True)
+
+        self.im.set_data(self.last_obs)  # Update image data
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
+        clear_output(wait=True)
         display(self.fig)
-        time.sleep(frame_speed) # give it time to display
+        plt.pause(frame_speed)
 
     def seed(self, x):
         pass

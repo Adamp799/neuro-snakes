@@ -47,8 +47,9 @@ class SnakeEnv(gym.Env):
         self.last_obs = self.controller.grid.grid.copy()
 
         self.fig, self.ax = plt.subplots()
-        self.im = self.ax.imshow(self.last_obs, animated=True)
-        plt.ion()  # Enable interactive mode
+        plt.close()
+        self.ax.axis('off')
+        self.im = self.ax.imshow(self.last_obs)
         return self.last_obs
 
     def render(self, close=False, frame_speed=.2):

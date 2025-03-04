@@ -8,33 +8,27 @@ from neat import nn, population
 import matplotlib.pyplot as plt
 
 global pop
+global generation_number
 rendering = True
 
 def look_to(env, direction):
     snake = env.controller.snakes[0]
     if snake is None:
-       return 0
+       return 0, 0
     head = snake.head
     grid = env.grid
 
-    tail_found = False
-    food_found = False
-    
-    dist_tail = env.grid_size[0] * env.unit_size
-    dist_food = env.grid_size[0] * env.unit_size
-    dist = 0
-
-    while not grid.off_grid(head) and not snake is None and not (tail_found and food_found):
-      if not tail_found and grid.tail_space(head):
-        tail_found = True
-        dist_tail = dist
-      if not food_found and grid.food_space(head):
-        food_found = True
-        dist_food = dist
-      dist += 1
-      head = snake.step(head, direction)
-  
-    return dist_tail
+    if direction == 0:
+       foodDir = grid.food[1] < head[1]
+    elif direction == 1:
+       foodDir = grid.food[0] > head[0]
+    elif direction == 2:
+       foodDir = grid.food[1] > head[1]
+    elif direction == 3:
+       foodDir = grid.food[0] < head[0]
+   
+    safeDir = not grid.check_death(snake.step(head, direction))
+    return int(safeDir), int(foodDir)
 
 def save_object(obj, filename):
     with open(filename, 'wb') as output:
@@ -52,51 +46,76 @@ def save_best_instance(instance, filename='best_instances.pickle'):
     save_object(instances, filename)
 
 def eval_fitness(genomes, config):
+   global generation_number
+   global pop
+
    env = gym.make('snake-v0')
    genome_number = 0
    best_instance = None
-   generation_number = 0
    best_fitness = 0
    best_foods = 0
    loop_punishment = 0.1
+   survival_score = 0.1
    near_food_score = 0.1
 
    for genome_id, g in genomes:
       net = nn.FeedForwardNetwork.create(g, config) 
-      score = 0
-      hunger = 100 # 100 steps without eating and the snake dies
+      fitness = 0
+      score = 0;
+      hunger = 250 # steps without eating and the snake dies
       done = False
       env.reset()
-
-      head = env.controller.snakes[0].head
-      dist_to_food = abs((head[0]-env.grid.food[0]) + (head[1]-env.grid.food[1]))
 
       count = 0
       pastPoints = set()
       foods = 0
+      head = env.controller.snakes[0].head
+      dist_to_food = abs(head[0]-env.grid.food[0]) + abs(head[1]-env.grid.food[1])
 
       while not done:
         count += 1
-        outputs = net.activate([look_to(env, 0), look_to(env, 1), look_to(env, 2), look_to(env, 3)]) 
+        
+        inputs = []
+        for i in range(4):
+           looked = look_to(env, i)
+           inputs.append(looked[0])
+           inputs.append(looked[1])
+        print(inputs)
+
+        outputs = net.activate(inputs) 
         direction = outputs.index(max(outputs))
+        print(direction, outputs)
         obs, reward, done, info = env.step(direction)
 
+        fitness += reward
+        score += reward
+        if env.controller.snakes[0] is None:
+           break
+
         hunger -= 1
-        if hunger <= 0: break
+        if hunger <= 0: 
+           break
+        fitness += survival_score
+
+        head = env.controller.snakes[0].head
          
         if (head[0], head[1]) in pastPoints:
-          score -= loop_punishment
+           fitness -= loop_punishment
         pastPoints.add((head[0], head[1]))
-
-        score += reward
+        
+        new_dist_to_food = abs(head[0]-env.grid.food[0]) + abs(head[1]-env.grid.food[1])
+        print(new_dist_to_food, dist_to_food)
         if reward > 0:
-          pastPoints = set()
-          hunger += 100
-          foods += 1
-        elif dist_to_food <= 1:
-           score += near_food_score
+           pastPoints = set()
+           hunger += 250
+           foods += 1
+        elif new_dist_to_food < dist_to_food:
+           fitness += near_food_score
+        else:
+           fitness -= near_food_score
+        dist_to_food = new_dist_to_food
       
-      g.fitness = score 
+      g.fitness = fitness
       if best_instance is None or g.fitness > best_fitness:
          best_instance = {
             'genome': g,
@@ -118,18 +137,44 @@ def eval_fitness(genomes, config):
 
 ############################################################################################################
 
-config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                     neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                     'config')
-pop = population.Population(config)
+def run_pop(gens, file=None):
+   global generation_number
+   global pop
+   generation_number = 0
+   config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                        neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                        'config')
+   pop = population.Population(config)
 
-if len(sys.argv) > 1: # load population from file
-    pop = load_object(sys.argv[1])
-    print("Reading popolation from " + sys.argv[1])
+   if file is not None: # load population from file
+      pop = load_object(file)
+      generation_number = pop.generation + 1
+      print("Reading population from " + file)
 
-pop.run(eval_fitness, 100) 
+   pop.run(eval_fitness, gens) 
 
-best_instances = load_object('best_instances.pickle')
-best_instances = sorted(best_instances, key=lambda x: x['fitness'], reverse=True)
-print("Best instances: ", best_instances[:5])
+def test_best_instance():
+   best_instances = load_object('best_instances.pickle')
+   best_instances = sorted(best_instances, key=lambda x: x['fitness'], reverse=True)
+   print("Best instances: ", best_instances[:5])
+   input("Press enter to continue")
 
+   best_net = best_instances[0]['net']
+   env = gym.make('snake-v0')
+   env.reset()
+   done = False
+   score = 0
+   while not done:
+    env.render()
+    print(score)
+
+    inputs = []
+    for i in range(4):
+        looked = look_to(env, i)
+        inputs.append(looked[0])
+        inputs.append(looked[1])
+    
+    outputs = best_net.activate(inputs) 
+    direction = outputs.index(max(outputs))
+    obs, reward, done, info = env.step(direction)
+    score += reward

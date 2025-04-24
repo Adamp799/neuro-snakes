@@ -34,6 +34,7 @@ class Controller():
         else:
             for i in range(n_foods):
                 self.grid.new_food()
+        self.food = self.grid.food
 
     def move_snake(self, direction, snake_idx):
         """

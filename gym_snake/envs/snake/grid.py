@@ -42,6 +42,7 @@ class Grid():
 
         head_coord - x,y integer coordinates as a tuple, list, or ndarray
         """
+        
         return self.off_grid(head_coord) or self.snake_space(head_coord)
 
     def color_of(self, coord):
@@ -210,6 +211,7 @@ class Grid():
         if self.open_space < 1 or not np.array_equal(self.color_of(coord), self.SPACE_COLOR):
             return False
         self.draw(coord, self.FOOD_COLOR)
+        self.food = coord
         return True
 
     def new_food(self):

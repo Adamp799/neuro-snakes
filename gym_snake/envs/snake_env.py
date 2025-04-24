@@ -32,7 +32,7 @@ class SnakeEnv(gym.Env):
             self.grid_size, self.unit_size, self.unit_gap,
             self.snake_size, self.n_snakes, self.n_foods,
             random_init=self.random_init)
-        grid = self.grid = controller.grid
+        grid = controller.grid
         self.observation_space = spaces.Box(
             low=np.min(grid.COLORS),
             high=np.max(grid.COLORS),
@@ -52,7 +52,7 @@ class SnakeEnv(gym.Env):
         self.im = self.ax.imshow(self.last_obs)
         return self.last_obs
 
-    def render(self, close=False, frame_speed=.2):
+    def render(self, close=False, frame_speed=.005):
         if close:
             plt.close()
             return

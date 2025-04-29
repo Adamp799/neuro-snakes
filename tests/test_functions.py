@@ -7,15 +7,19 @@ from gym.envs.registration import register
 import matplotlib.pyplot as plt
 import numpy as np
 
+# This script is for testing the Snake environment in the gym_snake package.
+
+# Manually test the environment by controlling the snake with keyboard inputs.
+# The user can input 'w', 'a', 's', 'd' to control the snake's movement.
 def manual_test(env):
     env.reset()
     key = ""
     score = np.zeros(env.n_snakes)
     snakes_remaining = env.n_snakes
+    snake = env.controller.snakes[0]
     while key != "q":
         env.render()
-        print("Rewards: {} | Snakes Remaining: {}".format(score, snakes_remaining));
-        print(env.controller.snakes[0].head)
+        print("Rewards: {} | Snakes Remaining: {}".format(score, snakes_remaining))
         actions = [0] * env.n_snakes
         for i in range(len(actions)):
             key = input("action " + str(i+1) + " : ")
@@ -32,7 +36,8 @@ def manual_test(env):
     print("Rewards: {} | Snakes Remaining: {}".format(score, snakes_remaining));
     env.render(close=True)
 
-def render_test(env):
+# Test the environment with random actions
+def random_test(env):
     env.reset()
     done = False
     score = np.zeros(env.n_snakes)
@@ -52,6 +57,7 @@ def render_test(env):
         print("Rewards: {} | Snakes Remaining: {}".format(score, snakes_remaining))
         env.render(close=True)
 
+# Function to create a custom Snake environment with specified parameters
 def create_env(grid_size, unit_size, unit_gap, snake_size, n_snakes, n_foods, random_init):
     class CustomSnakeEnv(SnakeEnv):
         metadata = {'render.modes': ['human']}

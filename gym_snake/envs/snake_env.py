@@ -42,6 +42,8 @@ class SnakeEnv(gym.Env):
         self.last_obs, rewards, done, info = self.controller.step(action)
         return self.last_obs, rewards, done, info
 
+    # Reset the environment to an initial state
+    # This method should be called at the beginning of each episode
     def reset(self):
         self.controller = Controller(self.grid_size, self.unit_size, self.unit_gap, self.snake_size, self.n_snakes, self.n_foods, random_init=self.random_init)
         self.last_obs = self.controller.grid.grid.copy()
@@ -52,7 +54,8 @@ class SnakeEnv(gym.Env):
         self.im = self.ax.imshow(self.last_obs)
         return self.last_obs
 
-    def render(self, close=False, frame_speed=.005):
+    # Render the environment
+    def render(self, close=False, frame_speed=.05):
         if close:
             plt.close()
             return

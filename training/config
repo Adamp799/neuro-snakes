@@ -7,9 +7,9 @@ no_fitness_termination = True
 
 [DefaultGenome]
 # node activation options
-activation_default      = relu
-activation_mutate_rate  = 0.3
-activation_options      = sigmoid relu
+activation_default      = sigmoid
+activation_mutate_rate  = 0.2
+activation_options      = relu sigmoid identity
 response_replace_rate    = 0.1
 response_mutate_rate     = 0.2
 response_mutate_power     = 0.4
@@ -37,8 +37,8 @@ compatibility_disjoint_coefficient = 2.0
 compatibility_weight_coefficient   = 0.3
 
 # connection add/remove rates
-conn_add_prob           = 0.4
-conn_delete_prob        = 0.4
+conn_add_prob           = 0.3
+conn_delete_prob        = 0.3
 
 # connection enable options
 enabled_default         = True
@@ -52,12 +52,12 @@ enable_prob             = 0.2
 disable_prob            = 0.2
 
 # node add/remove rates
-node_add_prob           = 0.2
-node_delete_prob        = 0.2
+node_add_prob           = 0.3
+node_delete_prob        = 0.3
 
 # network parameters
 num_hidden              = 0
-num_inputs              = 8
+num_inputs              = 9
 num_outputs             = 4
 
 # connection weight options

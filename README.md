@@ -1,5 +1,5 @@
 # README 
-
+Training autonomous agent(s) to play the Snake game with Neuroevolution. \
 Gym, PyTorch, and NEAT-Python libraries must be installed.
 
 Test functions can be run from the jupyter notebook files: \
